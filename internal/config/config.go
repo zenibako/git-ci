@@ -22,7 +22,7 @@ func DefaultConfig() *RunnerConfig {
 
 	return &RunnerConfig{
 		DryRun:      false,
-		Verbose:     false, // maybe false
+		Verbose:     false, // maybe should be false... willl see
 		PullImages:  true,
 		NoCache:     false,
 		WorkDir:     workDir,
