@@ -1,0 +1,15 @@
+stages:
+  - test
+
+test-run:
+  stage: test
+  image: ubuntu:latest
+  variables:
+    NODE_ENV: "test"
+  script:
+    - echo "Node environment: $NODE_ENV"
+    - echo "Working directory: $(pwd)"
+    - echo "test content from gitlab" > test.txt
+    - cat test.txt
+  only:
+    - merge_requests
