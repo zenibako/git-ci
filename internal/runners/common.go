@@ -403,7 +403,7 @@ func (p *Progress) Update(message string) {
 		p.formatter.Color(message, ColorGray))
 }
 
-// JobSummary represents a summary of job execution
+// JobSummary represents a summary of job execution (in order to track the execution of job)
 type JobSummary struct {
 	JobName        string
 	TotalSteps     int

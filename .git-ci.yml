@@ -1,0 +1,25 @@
+# git-ci configuration file
+# https://github.com/sanix-darker/git-ci
+
+defaults:
+    runner: bash
+    timeout: 30
+    max_parallel: 4
+environment:
+    CI: "true"
+    GIT_CI: "true"
+docker:
+    pull: true
+    network: bridge
+cache:
+    enabled: true
+    paths:
+        - node_modules
+        - .cache
+        - vendor
+artifacts:
+    paths:
+        - dist
+        - build
+        - coverage
+    expire_in: 1 week

@@ -20,6 +20,7 @@ func CmdClean(c *cli.Context) error {
 	all := c.Bool("all")
 	containers := c.Bool("containers") || all
 	images := c.Bool("images") || all
+   // TODO: handle pod cleaning too, if needed
 	cache := c.Bool("cache") || all
 	force := c.Bool("force")
 
