@@ -177,10 +177,10 @@ func (r *DockerRunner) RunJob(job *types.Job, workdir string) error {
 }
 
 func (r *DockerRunner) RunStep(step *types.Step, env map[string]string, workdir string) error {
-    // TODO:
+	// TODO:
 	// Steps are executed as part of the job script in Docker
 	// This could be enhanced to support individual step containers
-    // for later
+	// for later
 	return nil
 }
 
@@ -216,25 +216,25 @@ func (r *DockerRunner) getImageName(job *types.Job) string {
 
 	// Common mappings
 	imageMap := map[string]string{
-		"ubuntu-24.04": "ubuntu:24.04",
-		"ubuntu-22.04": "ubuntu:22.04",
-		"ubuntu-20.04": "ubuntu:20.04",
+		"ubuntu-24.04":  "ubuntu:24.04",
+		"ubuntu-22.04":  "ubuntu:22.04",
+		"ubuntu-20.04":  "ubuntu:20.04",
 		"ubuntu-latest": "ubuntu:latest",
-		"debian-12": "debian:12",
-		"debian-11": "debian:11",
-		"alpine-3.19": "alpine:3.19",
-		"alpine-3.18": "alpine:3.18",
-		"node-23": "node:23",
-		"node-22": "node:22",
-		"node-20": "node:20",
-		"node-18": "node:18-slim",
-		"python-3.14": "python:3.14-slim",
-		"python-3.13": "python:3.13-slim",
-		"python-3.12": "python:3.12-slim",
-		"python-3.11": "python:3.11-slim",
-		"golang-1.23": "golang:1.23-alpine",
-		"golang-1.22": "golang:1.22-alpine",
-		"golang-1.20": "golang:1.20-alpine",
+		"debian-12":     "debian:12",
+		"debian-11":     "debian:11",
+		"alpine-3.19":   "alpine:3.19",
+		"alpine-3.18":   "alpine:3.18",
+		"node-23":       "node:23",
+		"node-22":       "node:22",
+		"node-20":       "node:20",
+		"node-18":       "node:18-slim",
+		"python-3.14":   "python:3.14-slim",
+		"python-3.13":   "python:3.13-slim",
+		"python-3.12":   "python:3.12-slim",
+		"python-3.11":   "python:3.11-slim",
+		"golang-1.23":   "golang:1.23-alpine",
+		"golang-1.22":   "golang:1.22-alpine",
+		"golang-1.20":   "golang:1.20-alpine",
 	}
 
 	if image, ok := imageMap[runsOn]; ok {
@@ -358,10 +358,10 @@ func (r *DockerRunner) buildJobScript(job *types.Job) string {
 
 	// Add shebang and shell options
 	commands = append(commands, "#!/bin/sh")
-	commands = append(commands, "set -e")  // Exit on error
+	commands = append(commands, "set -e") // Exit on error
 
 	if r.config.Verbose {
-		commands = append(commands, "set -x")  // Print commands
+		commands = append(commands, "set -x") // Print commands
 	}
 
 	commands = append(commands, "")

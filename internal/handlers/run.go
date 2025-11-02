@@ -56,23 +56,23 @@ func selectJobsToRun(c *cli.Context, pipeline *types.Pipeline) map[string]*types
 
 	// Filter by specific job name
 	if jobName := c.String("job"); jobName != "" {
-		job, exists := jobs[jobName]
-		if !exists {
-			// Try pattern matching
-			matchedJobs := make(map[string]*types.Job)
-			for name, j := range jobs {
-				if matchPattern(name, jobName) {
-					matchedJobs[name] = j
-				}
-			}
-			if len(matchedJobs) > 0 {
-				return matchedJobs
-			}
-
-			fmt.Printf("Warning: job '%s' not found\n", jobName)
-			return nil
+		if job, exists := jobs[jobName]; exists {
+			fmt.Println(job)
+			return map[string]*types.Job{jobName: job}
 		}
-		return map[string]*types.Job{jobName: job}
+		// Try pattern matching
+		matchedJobs := make(map[string]*types.Job)
+		for name, j := range jobs {
+			if matchPattern(name, jobName) {
+				matchedJobs[name] = j
+			}
+		}
+		if len(matchedJobs) > 0 {
+			return matchedJobs
+		}
+
+		fmt.Printf("Warning: job '%s' not found\n", jobName)
+		return nil
 	}
 
 	// Filter by stage

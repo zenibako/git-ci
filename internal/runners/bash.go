@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -330,7 +331,7 @@ func (r *BashRunner) executeCommand(cmd *exec.Cmd, stepName string) error {
 		if stderrBuf.Len() > 0 && r.config.Verbose {
 			errMsg += fmt.Sprintf("\nStderr output:\n%s", stderrBuf.String())
 		}
-		return fmt.Errorf(errMsg)
+		return errors.New(errMsg)
 	}
 
 	return nil

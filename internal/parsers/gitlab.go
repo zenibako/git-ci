@@ -13,8 +13,8 @@ import (
 )
 
 type GitlabParser struct {
-	baseDir       string
-	includeCache  map[string]*GitlabCI
+	baseDir      string
+	includeCache map[string]*GitlabCI
 }
 
 // NewGitlabParser creates a new GitLab CI parser
@@ -27,176 +27,176 @@ func NewGitlabParser() *GitlabParser {
 // GitLab CI structures with full feature support
 type GitlabCI struct {
 	// Global configuration
-	Image        interface{}               `yaml:"image,omitempty"`
-	Services     []interface{}             `yaml:"services,omitempty"`
-	Stages       []string                  `yaml:"stages,omitempty"`
-	Variables    map[string]interface{}    `yaml:"variables,omitempty"`
-	Cache        interface{}               `yaml:"cache,omitempty"`
-	BeforeScript []interface{}             `yaml:"before_script,omitempty"`
-	AfterScript  []interface{}             `yaml:"after_script,omitempty"`
+	Image        interface{}            `yaml:"image,omitempty"`
+	Services     []interface{}          `yaml:"services,omitempty"`
+	Stages       []string               `yaml:"stages,omitempty"`
+	Variables    map[string]interface{} `yaml:"variables,omitempty"`
+	Cache        interface{}            `yaml:"cache,omitempty"`
+	BeforeScript []interface{}          `yaml:"before_script,omitempty"`
+	AfterScript  []interface{}          `yaml:"after_script,omitempty"`
 
 	// Workflow rules
-	Workflow     *GitlabWorkflow           `yaml:"workflow,omitempty"`
+	Workflow *GitlabWorkflow `yaml:"workflow,omitempty"`
 
 	// Includes for modular pipelines
-	Include      interface{}               `yaml:"include,omitempty"`
+	Include interface{} `yaml:"include,omitempty"`
 
 	// Default job configuration
-	Default      *GitlabDefault            `yaml:"default,omitempty"`
+	Default *GitlabDefault `yaml:"default,omitempty"`
 
 	// Jobs - everything else that's not a keyword
-	Jobs         map[string]*GitlabJob     `yaml:",inline"`
+	Jobs map[string]*GitlabJob `yaml:",inline"`
 }
 
 type GitlabWorkflow struct {
-	Rules        []GitlabRule              `yaml:"rules,omitempty"`
+	Rules []GitlabRule `yaml:"rules,omitempty"`
 }
 
 type GitlabDefault struct {
-	Image        interface{}               `yaml:"image,omitempty"`
-	Services     []interface{}             `yaml:"services,omitempty"`
-	BeforeScript []interface{}             `yaml:"before_script,omitempty"`
-	AfterScript  []interface{}             `yaml:"after_script,omitempty"`
-	Tags         []string                  `yaml:"tags,omitempty"`
-	Cache        interface{}               `yaml:"cache,omitempty"`
-	Artifacts    *GitlabArtifacts          `yaml:"artifacts,omitempty"`
-	Retry        interface{}               `yaml:"retry,omitempty"`
-	Timeout      string                    `yaml:"timeout,omitempty"`
-	Interruptible bool                     `yaml:"interruptible,omitempty"`
+	Image         interface{}      `yaml:"image,omitempty"`
+	Services      []interface{}    `yaml:"services,omitempty"`
+	BeforeScript  []interface{}    `yaml:"before_script,omitempty"`
+	AfterScript   []interface{}    `yaml:"after_script,omitempty"`
+	Tags          []string         `yaml:"tags,omitempty"`
+	Cache         interface{}      `yaml:"cache,omitempty"`
+	Artifacts     *GitlabArtifacts `yaml:"artifacts,omitempty"`
+	Retry         interface{}      `yaml:"retry,omitempty"`
+	Timeout       string           `yaml:"timeout,omitempty"`
+	Interruptible bool             `yaml:"interruptible,omitempty"`
 }
 
 type GitlabJob struct {
 	// Basic configuration
-	Stage        string                    `yaml:"stage,omitempty"`
-	Image        interface{}               `yaml:"image,omitempty"`
-	Services     []interface{}             `yaml:"services,omitempty"`
-	Script       []interface{}             `yaml:"script"`
+	Stage    string        `yaml:"stage,omitempty"`
+	Image    interface{}   `yaml:"image,omitempty"`
+	Services []interface{} `yaml:"services,omitempty"`
+	Script   []interface{} `yaml:"script"`
 
 	// Extended configuration
-	Extends      interface{}               `yaml:"extends,omitempty"`
-	Rules        []GitlabRule              `yaml:"rules,omitempty"`
-	Only         *GitlabOnlyExcept         `yaml:"only,omitempty"`
-	Except       *GitlabOnlyExcept         `yaml:"except,omitempty"`
+	Extends interface{}       `yaml:"extends,omitempty"`
+	Rules   []GitlabRule      `yaml:"rules,omitempty"`
+	Only    *GitlabOnlyExcept `yaml:"only,omitempty"`
+	Except  *GitlabOnlyExcept `yaml:"except,omitempty"`
 
 	// Job behavior
-	When         string                    `yaml:"when,omitempty"`
-	Manual       bool                      `yaml:"manual,omitempty"`
-	AllowFailure interface{}               `yaml:"allow_failure,omitempty"`
-	Retry        interface{}               `yaml:"retry,omitempty"`
-	Timeout      string                    `yaml:"timeout,omitempty"`
+	When         string      `yaml:"when,omitempty"`
+	Manual       bool        `yaml:"manual,omitempty"`
+	AllowFailure interface{} `yaml:"allow_failure,omitempty"`
+	Retry        interface{} `yaml:"retry,omitempty"`
+	Timeout      string      `yaml:"timeout,omitempty"`
 
 	// Scripts
-	BeforeScript []interface{}             `yaml:"before_script,omitempty"`
-	AfterScript  []interface{}             `yaml:"after_script,omitempty"`
+	BeforeScript []interface{} `yaml:"before_script,omitempty"`
+	AfterScript  []interface{} `yaml:"after_script,omitempty"`
 
 	// Variables and secrets
-	Variables    map[string]interface{}    `yaml:"variables,omitempty"`
-	Secrets      map[string]interface{}    `yaml:"secrets,omitempty"`
-	InheritVariables *bool                 `yaml:"inherit,omitempty"`
+	Variables        map[string]interface{} `yaml:"variables,omitempty"`
+	Secrets          map[string]interface{} `yaml:"secrets,omitempty"`
+	InheritVariables *bool                  `yaml:"inherit,omitempty"`
 
 	// Dependencies
-	Needs        interface{}               `yaml:"needs,omitempty"`
-	Dependencies []string                  `yaml:"dependencies,omitempty"`
+	Needs        interface{} `yaml:"needs,omitempty"`
+	Dependencies []string    `yaml:"dependencies,omitempty"`
 
 	// Artifacts and cache
-	Artifacts    *GitlabArtifacts          `yaml:"artifacts,omitempty"`
-	Cache        interface{}               `yaml:"cache,omitempty"`
+	Artifacts *GitlabArtifacts `yaml:"artifacts,omitempty"`
+	Cache     interface{}      `yaml:"cache,omitempty"`
 
 	// Runner selection
-	Tags         []string                  `yaml:"tags,omitempty"`
+	Tags []string `yaml:"tags,omitempty"`
 
 	// Parallel execution
-	Parallel     interface{}               `yaml:"parallel,omitempty"`
+	Parallel interface{} `yaml:"parallel,omitempty"`
 
 	// Environment
-	Environment  interface{}               `yaml:"environment,omitempty"`
+	Environment interface{} `yaml:"environment,omitempty"`
 
 	// Coverage
-	Coverage     string                    `yaml:"coverage,omitempty"`
+	Coverage string `yaml:"coverage,omitempty"`
 
 	// Release
-	Release      *GitlabRelease            `yaml:"release,omitempty"`
+	Release *GitlabRelease `yaml:"release,omitempty"`
 
 	// Pages
-	Pages        interface{}               `yaml:"pages,omitempty"`
+	Pages interface{} `yaml:"pages,omitempty"`
 
 	// Downstream pipelines
-	Trigger      interface{}               `yaml:"trigger,omitempty"`
+	Trigger interface{} `yaml:"trigger,omitempty"`
 
 	// Resource group
-	ResourceGroup string                   `yaml:"resource_group,omitempty"`
+	ResourceGroup string `yaml:"resource_group,omitempty"`
 
 	// Interruptible
-	Interruptible *bool                    `yaml:"interruptible,omitempty"`
+	Interruptible *bool `yaml:"interruptible,omitempty"`
 }
 
 type GitlabRule struct {
-	If           string                    `yaml:"if,omitempty"`
-	Changes      interface{}               `yaml:"changes,omitempty"`
-	Exists       []string                  `yaml:"exists,omitempty"`
-	When         string                    `yaml:"when,omitempty"`
-	StartIn      string                    `yaml:"start_in,omitempty"`
-	AllowFailure interface{}               `yaml:"allow_failure,omitempty"`
-	Variables    map[string]interface{}    `yaml:"variables,omitempty"`
+	If           string                 `yaml:"if,omitempty"`
+	Changes      interface{}            `yaml:"changes,omitempty"`
+	Exists       []string               `yaml:"exists,omitempty"`
+	When         string                 `yaml:"when,omitempty"`
+	StartIn      string                 `yaml:"start_in,omitempty"`
+	AllowFailure interface{}            `yaml:"allow_failure,omitempty"`
+	Variables    map[string]interface{} `yaml:"variables,omitempty"`
 }
 
 type GitlabOnlyExcept struct {
-	Refs         []string                  `yaml:"refs,omitempty"`
-	Variables    []string                  `yaml:"variables,omitempty"`
-	Changes      []string                  `yaml:"changes,omitempty"`
-	Kubernetes   string                    `yaml:"kubernetes,omitempty"`
+	Refs       []string `yaml:"refs,omitempty"`
+	Variables  []string `yaml:"variables,omitempty"`
+	Changes    []string `yaml:"changes,omitempty"`
+	Kubernetes string   `yaml:"kubernetes,omitempty"`
 }
 
 type GitlabArtifacts struct {
-	Name         string                    `yaml:"name,omitempty"`
-	Paths        []string                  `yaml:"paths,omitempty"`
-	Exclude      []string                  `yaml:"exclude,omitempty"`
-	ExpireIn     string                    `yaml:"expire_in,omitempty"`
-	ExposeAs     string                    `yaml:"expose_as,omitempty"`
-	Public       *bool                     `yaml:"public,omitempty"`
-	Reports      map[string]interface{}    `yaml:"reports,omitempty"`
-	Untracked    bool                      `yaml:"untracked,omitempty"`
-	When         string                    `yaml:"when,omitempty"`
+	Name      string                 `yaml:"name,omitempty"`
+	Paths     []string               `yaml:"paths,omitempty"`
+	Exclude   []string               `yaml:"exclude,omitempty"`
+	ExpireIn  string                 `yaml:"expire_in,omitempty"`
+	ExposeAs  string                 `yaml:"expose_as,omitempty"`
+	Public    *bool                  `yaml:"public,omitempty"`
+	Reports   map[string]interface{} `yaml:"reports,omitempty"`
+	Untracked bool                   `yaml:"untracked,omitempty"`
+	When      string                 `yaml:"when,omitempty"`
 }
 
 type GitlabCache struct {
-	Key          interface{}               `yaml:"key,omitempty"`
-	Paths        []string                  `yaml:"paths,omitempty"`
-	Policy       string                    `yaml:"policy,omitempty"`
-	Untracked    bool                      `yaml:"untracked,omitempty"`
-	When         string                    `yaml:"when,omitempty"`
-	Fallback     interface{}               `yaml:"fallback_keys,omitempty"`
+	Key       interface{} `yaml:"key,omitempty"`
+	Paths     []string    `yaml:"paths,omitempty"`
+	Policy    string      `yaml:"policy,omitempty"`
+	Untracked bool        `yaml:"untracked,omitempty"`
+	When      string      `yaml:"when,omitempty"`
+	Fallback  interface{} `yaml:"fallback_keys,omitempty"`
 }
 
 type GitlabEnvironment struct {
-	Name         string                    `yaml:"name"`
-	URL          string                    `yaml:"url,omitempty"`
-	OnStop       string                    `yaml:"on_stop,omitempty"`
-	Action       string                    `yaml:"action,omitempty"`
-	AutoStopIn   string                    `yaml:"auto_stop_in,omitempty"`
-	Kubernetes   map[string]interface{}    `yaml:"kubernetes,omitempty"`
-	Deployment   string                    `yaml:"deployment_tier,omitempty"`
+	Name       string                 `yaml:"name"`
+	URL        string                 `yaml:"url,omitempty"`
+	OnStop     string                 `yaml:"on_stop,omitempty"`
+	Action     string                 `yaml:"action,omitempty"`
+	AutoStopIn string                 `yaml:"auto_stop_in,omitempty"`
+	Kubernetes map[string]interface{} `yaml:"kubernetes,omitempty"`
+	Deployment string                 `yaml:"deployment_tier,omitempty"`
 }
 
 type GitlabRelease struct {
-	TagName      string                    `yaml:"tag_name"`
-	Description  string                    `yaml:"description,omitempty"`
-	Name         string                    `yaml:"name,omitempty"`
-	Ref          string                    `yaml:"ref,omitempty"`
-	Milestones   []string                  `yaml:"milestones,omitempty"`
-	ReleasedAt   string                    `yaml:"released_at,omitempty"`
-	Assets       *GitlabReleaseAssets      `yaml:"assets,omitempty"`
+	TagName     string               `yaml:"tag_name"`
+	Description string               `yaml:"description,omitempty"`
+	Name        string               `yaml:"name,omitempty"`
+	Ref         string               `yaml:"ref,omitempty"`
+	Milestones  []string             `yaml:"milestones,omitempty"`
+	ReleasedAt  string               `yaml:"released_at,omitempty"`
+	Assets      *GitlabReleaseAssets `yaml:"assets,omitempty"`
 }
 
 type GitlabReleaseAssets struct {
-	Links        []GitlabAssetLink         `yaml:"links,omitempty"`
+	Links []GitlabAssetLink `yaml:"links,omitempty"`
 }
 
 type GitlabAssetLink struct {
-	Name         string                    `yaml:"name"`
-	URL          string                    `yaml:"url"`
-	LinkType     string                    `yaml:"link_type,omitempty"`
-	Filepath     string                    `yaml:"filepath,omitempty"`
+	Name     string `yaml:"name"`
+	URL      string `yaml:"url"`
+	LinkType string `yaml:"link_type,omitempty"`
+	Filepath string `yaml:"filepath,omitempty"`
 }
 
 // Parse parses a GitLab CI configuration file
@@ -997,9 +997,9 @@ func (p *GitlabParser) convertRules(rules []GitlabRule) []types.Rule {
 	var result []types.Rule
 	for _, r := range rules {
 		rule := types.Rule{
-			If:           r.If,
-			When:         r.When,
-			Variables:    p.convertVariables(r.Variables),
+			If:        r.If,
+			When:      r.When,
+			Variables: p.convertVariables(r.Variables),
 		}
 
 		// Parse changes
@@ -1025,9 +1025,9 @@ func (p *GitlabParser) convertRules(rules []GitlabRule) []types.Rule {
 
 func (p *GitlabParser) convertOnlyExcept(oe *GitlabOnlyExcept) *types.OnlyExcept {
 	return &types.OnlyExcept{
-		Refs:      oe.Refs,
-		Changes:   oe.Changes,
-		Variables: oe.Variables,
+		Refs:       oe.Refs,
+		Changes:    oe.Changes,
+		Variables:  oe.Variables,
 		Kubernetes: oe.Kubernetes,
 	}
 }

@@ -27,13 +27,13 @@ func NewGithubParser() *GithubParser {
 
 // GitHub Actions workflow structures with full feature support
 type GithubWorkflow struct {
-	Name        string                    `yaml:"name"`
-	On          interface{}               `yaml:"on"`
-	Env         map[string]string         `yaml:"env,omitempty"`
-	Defaults    *GithubDefaults           `yaml:"defaults,omitempty"`
-	Jobs        map[string]*GithubJob     `yaml:"jobs"`
-	Permissions interface{}               `yaml:"permissions,omitempty"`
-	Concurrency *GithubConcurrency        `yaml:"concurrency,omitempty"`
+	Name        string                `yaml:"name"`
+	On          interface{}           `yaml:"on"`
+	Env         map[string]string     `yaml:"env,omitempty"`
+	Defaults    *GithubDefaults       `yaml:"defaults,omitempty"`
+	Jobs        map[string]*GithubJob `yaml:"jobs"`
+	Permissions interface{}           `yaml:"permissions,omitempty"`
+	Concurrency *GithubConcurrency    `yaml:"concurrency,omitempty"`
 }
 
 type GithubDefaults struct {
@@ -51,31 +51,31 @@ type GithubConcurrency struct {
 }
 
 type GithubJob struct {
-	Name             string                      `yaml:"name,omitempty"`
-	RunsOn           interface{}                 `yaml:"runs-on"`
-	Needs            interface{}                 `yaml:"needs,omitempty"`
-	If               string                      `yaml:"if,omitempty"`
-	Steps            []GithubStep                `yaml:"steps"`
-	Env              map[string]string           `yaml:"env,omitempty"`
-	Defaults         *GithubDefaults             `yaml:"defaults,omitempty"`
-	TimeoutMinutes   int                         `yaml:"timeout-minutes,omitempty"`
-	Strategy         *GithubStrategy             `yaml:"strategy,omitempty"`
-	ContinueOnError  interface{}                 `yaml:"continue-on-error,omitempty"`
-	Container        interface{}                 `yaml:"container,omitempty"`
-	Services         map[string]*GithubService   `yaml:"services,omitempty"`
-	Uses             string                      `yaml:"uses,omitempty"`
-	With             map[string]interface{}      `yaml:"with,omitempty"`
-	Secrets          interface{}                 `yaml:"secrets,omitempty"`
-	Outputs          map[string]string           `yaml:"outputs,omitempty"`
-	Environment      interface{}                 `yaml:"environment,omitempty"`
-	Concurrency      *GithubConcurrency          `yaml:"concurrency,omitempty"`
-	Permissions      interface{}                 `yaml:"permissions,omitempty"`
+	Name            string                    `yaml:"name,omitempty"`
+	RunsOn          interface{}               `yaml:"runs-on"`
+	Needs           interface{}               `yaml:"needs,omitempty"`
+	If              string                    `yaml:"if,omitempty"`
+	Steps           []GithubStep              `yaml:"steps"`
+	Env             map[string]string         `yaml:"env,omitempty"`
+	Defaults        *GithubDefaults           `yaml:"defaults,omitempty"`
+	TimeoutMinutes  int                       `yaml:"timeout-minutes,omitempty"`
+	Strategy        *GithubStrategy           `yaml:"strategy,omitempty"`
+	ContinueOnError interface{}               `yaml:"continue-on-error,omitempty"`
+	Container       interface{}               `yaml:"container,omitempty"`
+	Services        map[string]*GithubService `yaml:"services,omitempty"`
+	Uses            string                    `yaml:"uses,omitempty"`
+	With            map[string]interface{}    `yaml:"with,omitempty"`
+	Secrets         interface{}               `yaml:"secrets,omitempty"`
+	Outputs         map[string]string         `yaml:"outputs,omitempty"`
+	Environment     interface{}               `yaml:"environment,omitempty"`
+	Concurrency     *GithubConcurrency        `yaml:"concurrency,omitempty"`
+	Permissions     interface{}               `yaml:"permissions,omitempty"`
 }
 
 type GithubStrategy struct {
-	Matrix       interface{} `yaml:"matrix,omitempty"`
-	FailFast     *bool       `yaml:"fail-fast,omitempty"`
-	MaxParallel  int         `yaml:"max-parallel,omitempty"`
+	Matrix      interface{} `yaml:"matrix,omitempty"`
+	FailFast    *bool       `yaml:"fail-fast,omitempty"`
+	MaxParallel int         `yaml:"max-parallel,omitempty"`
 }
 
 type GithubMatrix struct {
@@ -84,21 +84,21 @@ type GithubMatrix struct {
 }
 
 type GithubService struct {
-	Image        string                 `yaml:"image"`
-	Env          map[string]string      `yaml:"env,omitempty"`
-	Ports        []interface{}          `yaml:"ports,omitempty"`
-	Volumes      []string               `yaml:"volumes,omitempty"`
-	Options      string                 `yaml:"options,omitempty"`
-	Credentials  map[string]string      `yaml:"credentials,omitempty"`
+	Image       string            `yaml:"image"`
+	Env         map[string]string `yaml:"env,omitempty"`
+	Ports       []interface{}     `yaml:"ports,omitempty"`
+	Volumes     []string          `yaml:"volumes,omitempty"`
+	Options     string            `yaml:"options,omitempty"`
+	Credentials map[string]string `yaml:"credentials,omitempty"`
 }
 
 type GithubContainer struct {
-	Image        string                 `yaml:"image"`
-	Env          map[string]string      `yaml:"env,omitempty"`
-	Ports        []interface{}          `yaml:"ports,omitempty"`
-	Volumes      []string               `yaml:"volumes,omitempty"`
-	Options      string                 `yaml:"options,omitempty"`
-	Credentials  map[string]string      `yaml:"credentials,omitempty"`
+	Image       string            `yaml:"image"`
+	Env         map[string]string `yaml:"env,omitempty"`
+	Ports       []interface{}     `yaml:"ports,omitempty"`
+	Volumes     []string          `yaml:"volumes,omitempty"`
+	Options     string            `yaml:"options,omitempty"`
+	Credentials map[string]string `yaml:"credentials,omitempty"`
 }
 
 type GithubStep struct {
@@ -754,46 +754,46 @@ func (p *GithubParser) GetWorkflowOutputs(workflow *GithubWorkflow) map[string]s
 
 // GetProviderName returns the name of this parser
 func (p *GithubParser) GetProviderName() string {
-    return "github"
+	return "github"
 }
 
 // ParseDirectory parses all workflow files in a directory
 func (p *GithubParser) ParseDirectory(dir string) ([]*types.Pipeline, error) {
-    workflowDir := filepath.Join(dir, ".github", "workflows")
+	workflowDir := filepath.Join(dir, ".github", "workflows")
 
-    if _, err := os.Stat(workflowDir); os.IsNotExist(err) {
-        return nil, fmt.Errorf("workflows directory not found: %s", workflowDir)
-    }
+	if _, err := os.Stat(workflowDir); os.IsNotExist(err) {
+		return nil, fmt.Errorf("workflows directory not found: %s", workflowDir)
+	}
 
-    entries, err := os.ReadDir(workflowDir)
-    if err != nil {
-        return nil, fmt.Errorf("failed to read workflows directory: %w", err)
-    }
+	entries, err := os.ReadDir(workflowDir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read workflows directory: %w", err)
+	}
 
-    var pipelines []*types.Pipeline
-    for _, entry := range entries {
-        if entry.IsDir() {
-            continue
-        }
+	var pipelines []*types.Pipeline
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
 
-        name := entry.Name()
-        if !strings.HasSuffix(name, ".yml") && !strings.HasSuffix(name, ".yaml") {
-            continue
-        }
+		name := entry.Name()
+		if !strings.HasSuffix(name, ".yml") && !strings.HasSuffix(name, ".yaml") {
+			continue
+		}
 
-        filePath := filepath.Join(workflowDir, name)
-        pipeline, err := p.Parse(filePath)
-        if err != nil {
-            fmt.Printf("Warning: Failed to parse %s: %v\n", name, err)
-            continue
-        }
+		filePath := filepath.Join(workflowDir, name)
+		pipeline, err := p.Parse(filePath)
+		if err != nil {
+			fmt.Printf("Warning: Failed to parse %s: %v\n", name, err)
+			continue
+		}
 
-        pipelines = append(pipelines, pipeline)
-    }
+		pipelines = append(pipelines, pipeline)
+	}
 
-    if len(pipelines) == 0 {
-        return nil, fmt.Errorf("no valid workflow files found in %s", workflowDir)
-    }
+	if len(pipelines) == 0 {
+		return nil, fmt.Errorf("no valid workflow files found in %s", workflowDir)
+	}
 
-    return pipelines, nil
+	return pipelines, nil
 }

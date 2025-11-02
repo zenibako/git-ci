@@ -128,7 +128,7 @@ func buildRunnerConfig(c *cli.Context) *config.RunnerConfig {
 	// Parse environment variables
 	cfg.Environment = parseEnvironmentVars(c)
 
-    // FIXME: commenting out those for now
+	// FIXME: commenting out those for now
 	//// Parse volumes
 	//if volumes := c.StringSlice("volume"); len(volumes) > 0 {
 	//	cfg.Volumes = volumes

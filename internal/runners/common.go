@@ -263,14 +263,14 @@ func (p *Progress) Update(message string) {
 
 // JobSummary represents a summary of job execution
 type JobSummary struct {
-	JobName      string
-	TotalSteps   int
+	JobName        string
+	TotalSteps     int
 	CompletedSteps int
-	FailedSteps  int
-	SkippedSteps int
-	Duration     time.Duration
-	Success      bool
-	Errors       []string
+	FailedSteps    int
+	SkippedSteps   int
+	Duration       time.Duration
+	Success        bool
+	Errors         []string
 }
 
 // PrintJobSummary prints a detailed job summary

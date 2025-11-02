@@ -7,27 +7,27 @@ import (
 	"strings"
 
 	cli "github.com/urfave/cli/v2"
-	"gopkg.in/yaml.v3"
+	yaml "gopkg.in/yaml.v3"
 )
 
 // GitCIConfig represents the git-ci configuration
 type GitCIConfig struct {
-	Defaults    DefaultsConfig          `yaml:"defaults"`
-	Environment map[string]string       `yaml:"environment,omitempty"`
-	Docker      DockerConfig            `yaml:"docker,omitempty"`
-	Cache       CacheConfig             `yaml:"cache,omitempty"`
-	Artifacts   ArtifactsConfig         `yaml:"artifacts,omitempty"`
-	Hooks       HooksConfig             `yaml:"hooks,omitempty"`
+	Defaults    DefaultsConfig    `yaml:"defaults"`
+	Environment map[string]string `yaml:"environment,omitempty"`
+	Docker      DockerConfig      `yaml:"docker,omitempty"`
+	Cache       CacheConfig       `yaml:"cache,omitempty"`
+	Artifacts   ArtifactsConfig   `yaml:"artifacts,omitempty"`
+	Hooks       HooksConfig       `yaml:"hooks,omitempty"`
 }
 
 // DefaultsConfig represents default settings
 type DefaultsConfig struct {
-	Runner           string `yaml:"runner,omitempty"`
-	Timeout          int    `yaml:"timeout,omitempty"`
-	Parallel         bool   `yaml:"parallel,omitempty"`
-	MaxParallel      int    `yaml:"max_parallel,omitempty"`
-	ContinueOnError  bool   `yaml:"continue_on_error,omitempty"`
-	Verbose          bool   `yaml:"verbose,omitempty"`
+	Runner          string `yaml:"runner,omitempty"`
+	Timeout         int    `yaml:"timeout,omitempty"`
+	Parallel        bool   `yaml:"parallel,omitempty"`
+	MaxParallel     int    `yaml:"max_parallel,omitempty"`
+	ContinueOnError bool   `yaml:"continue_on_error,omitempty"`
+	Verbose         bool   `yaml:"verbose,omitempty"`
 }
 
 // DockerConfig represents Docker-specific configuration
@@ -55,10 +55,10 @@ type ArtifactsConfig struct {
 
 // HooksConfig represents hook configuration
 type HooksConfig struct {
-	BeforeJob  []string `yaml:"before_job,omitempty"`
-	AfterJob   []string `yaml:"after_job,omitempty"`
-	OnFailure  []string `yaml:"on_failure,omitempty"`
-	OnSuccess  []string `yaml:"on_success,omitempty"`
+	BeforeJob []string `yaml:"before_job,omitempty"`
+	AfterJob  []string `yaml:"after_job,omitempty"`
+	OnFailure []string `yaml:"on_failure,omitempty"`
+	OnSuccess []string `yaml:"on_success,omitempty"`
 }
 
 // CmdConfigShow handles the config show command

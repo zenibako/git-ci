@@ -225,8 +225,8 @@ func saveEnvFile(vars []string, filename string) error {
 
 // isSensitive checks if an environment variable key is sensitive
 func isSensitive(key string) bool {
-    // TODO:
-    // not optimizal for now... will find a better way later on
+	// TODO:
+	// not optimizal for now... will find a better way later on
 	sensitive := []string{
 		"PASSWORD", "SECRET", "TOKEN", "KEY", "CREDENTIAL",
 		"PRIVATE", "AUTH", "API_KEY", "ACCESS", "CERT",

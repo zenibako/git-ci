@@ -93,9 +93,9 @@ func commands() []*cli.Command {
 					EnvVars: []string{"GIT_CI_FILE"},
 				},
 				&cli.StringFlag{
-					Name:    "format",
-					Usage:   "Output format (tree, json, yaml)",
-					Value:   "tree",
+					Name:  "format",
+					Usage: "Output format (tree, json, yaml)",
+					Value: "tree",
 				},
 			},
 		},
