@@ -6,142 +6,254 @@ import (
 	"time"
 )
 
-// Helper function that was missing - Fixed
-func truncateMultiline(s string, maxLines int) string {
-	lines := strings.Split(s, "\n")
-	if len(lines) <= maxLines {
-		return s
-	}
+// ANSI color codes - subtle/muted versions
+const (
+	ColorReset   = "\033[0m"
+	ColorRed     = "\033[31m"     // Red for errors
+	ColorGreen   = "\033[32m"     // Green for success (subtle)
+	ColorYellow  = "\033[33m"     // Yellow for warnings
+	ColorBlue    = "\033[34m"     // Blue for info
+	ColorGray    = "\033[90m"     // Gray for secondary info
+	ColorDimGray = "\033[2;37m"   // Dim gray for less important
+	ColorBold    = "\033[1m"      // Bold
+	ColorDim     = "\033[2m"      // Dim
 
-	truncated := strings.Join(lines[:maxLines], "\n")
-	return fmt.Sprintf("%s\n   ... (%d more lines)", truncated, len(lines)-maxLines)
-}
+	// Additional muted colors
+	ColorDarkBlue  = "\033[34;2m" // Darker blue
+	ColorDarkGray  = "\033[1;30m" // Dark gray
+	ColorLightGray = "\033[37m"   // Light gray
+)
 
-// Helper function to escape shell commands
-func escapeShellCommand(cmd string) string {
-	// Escape single quotes in the command
-	return strings.ReplaceAll(cmd, "'", "'\\''")
-}
+// IndentLevel represents the current indentation level
+type IndentLevel int
+
+const (
+	IndentNone  IndentLevel = 0
+	IndentJob   IndentLevel = 1
+	IndentStep  IndentLevel = 2
+	IndentDetail IndentLevel = 3
+	IndentOutput IndentLevel = 4
+)
 
 // OutputFormatter provides consistent output formatting for all runners
 type OutputFormatter struct {
-	Verbose bool
-	Width   int
+	Verbose    bool
+	Width      int
+	UseColor   bool
+	IndentSize int
 }
 
 // NewOutputFormatter creates a new output formatter
 func NewOutputFormatter(verbose bool) *OutputFormatter {
 	return &OutputFormatter{
-		Verbose: verbose,
-		Width:   80, // Default terminal width
+		Verbose:    verbose,
+		Width:      80,
+		UseColor:   true,  // Can be made configurable
+		IndentSize: 2,     // Spaces per indent level
 	}
+}
+
+// GetIndent returns the indentation string for a given level
+func (f *OutputFormatter) GetIndent(level IndentLevel) string {
+	return strings.Repeat(" ", int(level)*f.IndentSize)
+}
+
+// Color applies color to text if colors are enabled
+func (f *OutputFormatter) Color(text string, color string) string {
+	if !f.UseColor {
+		return text
+	}
+	return color + text + ColorReset
 }
 
 // PrintHeader prints the job execution header
 func (f *OutputFormatter) PrintHeader(jobName, workdir, runner string) {
 	fmt.Println()
 	fmt.Println(f.Line('='))
-	fmt.Printf(" Running Job: %s\n", jobName)
+	fmt.Printf("%s Running Job: %s\n",
+		f.GetIndent(IndentNone),
+		f.Color(jobName, ColorBold))
 	fmt.Println(f.Line('-'))
-	fmt.Printf(" Working Directory: %s\n", workdir)
-	fmt.Printf(" Runner: %s\n", runner)
+	fmt.Printf("%s Working Directory: %s\n",
+		f.GetIndent(IndentJob),
+		f.Color(workdir, ColorGray))
+	fmt.Printf("%s Runner: %s\n",
+		f.GetIndent(IndentJob),
+		f.Color(runner, ColorGray))
 	fmt.Println(f.Line('='))
 }
 
 // PrintStepHeader prints a step header with progress
 func (f *OutputFormatter) PrintStepHeader(stepName string, current, total int) {
 	fmt.Println()
-	fmt.Printf("[%d/%d] %s\n", current, total, stepName)
-	fmt.Println(f.Line('-'))
+	progress := fmt.Sprintf("[%d/%d]", current, total)
+	fmt.Printf("%s%s %s\n",
+		f.GetIndent(IndentStep),
+		f.Color(progress, ColorDarkGray),
+		f.Color(stepName, ColorBlue))
+	fmt.Printf("%s%s\n",
+		f.GetIndent(IndentStep),
+		f.Color(f.Line('-'), ColorDimGray))
 }
 
 // PrintStepComplete prints step completion
 func (f *OutputFormatter) PrintStepComplete(duration time.Duration) {
-	fmt.Printf("Step completed in %s\n", f.FormatDuration(duration))
+	fmt.Printf("%s%s %s\n",
+		f.GetIndent(IndentStep),
+		f.Color("✓", ColorGreen),
+		f.Color(fmt.Sprintf("Step completed in %s", f.FormatDuration(duration)), ColorGray))
 }
 
 // PrintStepFailed prints step failure
 func (f *OutputFormatter) PrintStepFailed(err error, duration time.Duration) {
-	fmt.Printf("Step FAILED after %s: %v\n", f.FormatDuration(duration), err)
+	fmt.Printf("%s%s Step FAILED after %s: %s\n",
+		f.GetIndent(IndentStep),
+		f.Color("✗", ColorRed),
+		f.FormatDuration(duration),
+		f.Color(err.Error(), ColorRed))
 }
 
 // PrintStepSkipped prints that a step was skipped
 func (f *OutputFormatter) PrintStepSkipped(reason string) {
-	fmt.Printf("Step skipped: %s\n", reason)
+	fmt.Printf("%s%s Step skipped: %s\n",
+		f.GetIndent(IndentStep),
+		f.Color("○", ColorYellow),
+		f.Color(reason, ColorDimGray))
 }
 
 // PrintJobComplete prints job completion summary
 func (f *OutputFormatter) PrintJobComplete(jobName string, duration time.Duration, success bool) {
 	fmt.Println()
 	fmt.Println(f.Line('='))
-	if success {
-		fmt.Printf(" Job '%s' completed successfully\n", jobName)
-	} else {
-		fmt.Printf(" Job '%s' FAILED\n", jobName)
+
+	status := "completed successfully"
+	color := ColorGreen
+	if !success {
+		status = "FAILED"
+		color = ColorRed
 	}
-	fmt.Printf(" Total duration: %s\n", f.FormatDuration(duration))
+
+	fmt.Printf("%s Job '%s' %s\n",
+		f.GetIndent(IndentJob),
+		f.Color(jobName, ColorBold),
+		f.Color(status, color))
+	fmt.Printf("%s Total duration: %s\n",
+		f.GetIndent(IndentJob),
+		f.Color(f.FormatDuration(duration), ColorGray))
 	fmt.Println(f.Line('='))
 	fmt.Println()
 }
 
-// PrintOutput prints command output with optional prefix
+// PrintOutput prints command output with optional prefix and indentation
 func (f *OutputFormatter) PrintOutput(line string, indent int) {
-	prefix := strings.Repeat(" ", indent)
-	fmt.Printf("%s%s\n", prefix, line)
+	// Use custom indent or convert to IndentLevel
+	indentStr := strings.Repeat(" ", indent)
+
+	// Mute the output color to gray for less distraction
+	fmt.Printf("%s%s\n", indentStr, f.Color(line, ColorDimGray))
+}
+
+// PrintOutputWithLevel prints output with specific indent level
+func (f *OutputFormatter) PrintOutputWithLevel(line string, level IndentLevel) {
+	fmt.Printf("%s%s\n",
+		f.GetIndent(level),
+		f.Color(line, ColorDimGray))
 }
 
 // PrintInfo prints an informational message
 func (f *OutputFormatter) PrintInfo(message string) {
-	fmt.Printf("INFO: %s\n", message)
+	fmt.Printf("%s%s %s\n",
+		f.GetIndent(IndentDetail),
+		f.Color("ℹ", ColorBlue),
+		f.Color(message, ColorLightGray))
 }
 
 // PrintWarning prints a warning message
 func (f *OutputFormatter) PrintWarning(message string) {
-	fmt.Printf("WARNING: %s\n", message)
+	fmt.Printf("%s%s %s\n",
+		f.GetIndent(IndentDetail),
+		f.Color("⚠", ColorYellow),
+		f.Color(message, ColorYellow))
 }
 
 // PrintError prints an error message
 func (f *OutputFormatter) PrintError(message string) {
-	fmt.Printf("ERROR: %s\n", message)
+	fmt.Printf("%s%s %s\n",
+		f.GetIndent(IndentDetail),
+		f.Color("✗", ColorRed),
+		f.Color(message, ColorRed))
 }
 
 // PrintDebug prints a debug message if verbose mode is enabled
 func (f *OutputFormatter) PrintDebug(message string) {
 	if f.Verbose {
-		fmt.Printf("DEBUG: %s\n", message)
+		fmt.Printf("%s%s %s\n",
+			f.GetIndent(IndentOutput),
+			f.Color("[DEBUG]", ColorDarkGray),
+			f.Color(message, ColorDimGray))
 	}
 }
 
 // PrintDryRun prints dry run header
 func (f *OutputFormatter) PrintDryRun() {
 	fmt.Println()
-	fmt.Println(f.Line('*'))
-	fmt.Println(" DRY RUN MODE - Commands will be displayed but not executed")
-	fmt.Println(f.Line('*'))
+	fmt.Println(f.Color(f.Line('*'), ColorYellow))
+	fmt.Printf("%s %s\n",
+		f.GetIndent(IndentJob),
+		f.Color("DRY RUN MODE - Commands will be displayed but not executed", ColorYellow))
+	fmt.Println(f.Color(f.Line('*'), ColorYellow))
 }
 
 // PrintSection prints a section header
 func (f *OutputFormatter) PrintSection(title string) {
 	fmt.Println()
-	fmt.Printf("%s\n", title)
-	fmt.Println(f.Line('-'))
+	fmt.Printf("%s%s\n",
+		f.GetIndent(IndentJob),
+		f.Color(title, ColorBold))
+	fmt.Printf("%s%s\n",
+		f.GetIndent(IndentJob),
+		f.Color(f.Line('-'), ColorDimGray))
 }
 
 // PrintSubSection prints a subsection with indent
 func (f *OutputFormatter) PrintSubSection(title string) {
-	fmt.Printf("  %s\n", title)
+	fmt.Printf("%s%s\n",
+		f.GetIndent(IndentStep),
+		f.Color(title, ColorBlue))
 }
 
-// PrintKeyValue prints a key-value pair
+// PrintKeyValue prints a key-value pair with proper indentation
 func (f *OutputFormatter) PrintKeyValue(key, value string, indent int) {
 	prefix := strings.Repeat(" ", indent)
-	fmt.Printf("%s%s: %s\n", prefix, key, value)
+	fmt.Printf("%s%s: %s\n",
+		prefix,
+		f.Color(key, ColorDarkGray),
+		f.Color(value, ColorLightGray))
 }
 
-// PrintList prints a list item
+// PrintKeyValueWithLevel prints a key-value pair at specific indent level
+func (f *OutputFormatter) PrintKeyValueWithLevel(key, value string, level IndentLevel) {
+	fmt.Printf("%s%s: %s\n",
+		f.GetIndent(level),
+		f.Color(key, ColorDarkGray),
+		f.Color(value, ColorLightGray))
+}
+
+// PrintList prints a list item with proper indentation
 func (f *OutputFormatter) PrintList(item string, indent int) {
 	prefix := strings.Repeat(" ", indent)
-	fmt.Printf("%s- %s\n", prefix, item)
+	fmt.Printf("%s%s %s\n",
+		prefix,
+		f.Color("•", ColorDarkGray),
+		f.Color(item, ColorLightGray))
+}
+
+// PrintListWithLevel prints a list item at specific indent level
+func (f *OutputFormatter) PrintListWithLevel(item string, level IndentLevel) {
+	fmt.Printf("%s%s %s\n",
+		f.GetIndent(level),
+		f.Color("•", ColorDarkGray),
+		f.Color(item, ColorLightGray))
 }
 
 // PrintCommand prints a command that will be or was executed
@@ -153,19 +265,34 @@ func (f *OutputFormatter) PrintCommand(cmd string, indent int) {
 		lines := f.WrapText(cmd, f.Width-indent-4)
 		for i, line := range lines {
 			if i == 0 {
-				fmt.Printf("%s$ %s\n", prefix, line)
+				fmt.Printf("%s%s %s\n",
+					prefix,
+					f.Color("$", ColorBlue),
+					f.Color(line, ColorGray))
 			} else {
-				fmt.Printf("%s  %s\n", prefix, line)
+				fmt.Printf("%s  %s\n",
+					prefix,
+					f.Color(line, ColorGray))
 			}
 		}
 	} else {
-		fmt.Printf("%s$ %s\n", prefix, cmd)
+		fmt.Printf("%s%s %s\n",
+			prefix,
+			f.Color("$", ColorBlue),
+			f.Color(cmd, ColorGray))
 	}
+}
+
+// PrintCommandWithLevel prints a command at specific indent level
+func (f *OutputFormatter) PrintCommandWithLevel(cmd string, level IndentLevel) {
+	f.PrintCommand(cmd, int(level)*f.IndentSize)
 }
 
 // Line generates a line of the specified character
 func (f *OutputFormatter) Line(char rune) string {
-	return strings.Repeat(string(char), f.Width)
+	// Make lines slightly shorter for cleaner look
+	width := f.Width - (f.IndentSize * 2)
+	return strings.Repeat(string(char), width)
 }
 
 // FormatDuration formats a duration in a human-readable way
@@ -233,16 +360,25 @@ type Progress struct {
 	formatter *OutputFormatter
 	message   string
 	start     time.Time
+	level     IndentLevel
 }
 
 // NewProgress creates a new progress indicator
 func (f *OutputFormatter) NewProgress(message string) *Progress {
+	return f.NewProgressWithLevel(message, IndentDetail)
+}
+
+// NewProgressWithLevel creates a new progress indicator at specific indent level
+func (f *OutputFormatter) NewProgressWithLevel(message string, level IndentLevel) *Progress {
 	p := &Progress{
 		formatter: f,
 		message:   message,
 		start:     time.Now(),
+		level:     level,
 	}
-	fmt.Printf("%s... ", message)
+	fmt.Printf("%s%s... ",
+		f.GetIndent(level),
+		f.Color(message, ColorGray))
 	return p
 }
 
@@ -250,15 +386,21 @@ func (f *OutputFormatter) NewProgress(message string) *Progress {
 func (p *Progress) Complete(success bool) {
 	duration := time.Since(p.start)
 	if success {
-		fmt.Printf("done (%s)\n", p.formatter.FormatDuration(duration))
+		fmt.Printf("%s (%s)\n",
+			p.formatter.Color("done", ColorGreen),
+			p.formatter.Color(p.formatter.FormatDuration(duration), ColorDimGray))
 	} else {
-		fmt.Printf("FAILED (%s)\n", p.formatter.FormatDuration(duration))
+		fmt.Printf("%s (%s)\n",
+			p.formatter.Color("FAILED", ColorRed),
+			p.formatter.Color(p.formatter.FormatDuration(duration), ColorDimGray))
 	}
 }
 
 // Update updates the progress message
 func (p *Progress) Update(message string) {
-	fmt.Printf("\r%s... ", message)
+	fmt.Printf("\r%s%s... ",
+		p.formatter.GetIndent(p.level),
+		p.formatter.Color(message, ColorGray))
 }
 
 // JobSummary represents a summary of job execution
@@ -276,39 +418,47 @@ type JobSummary struct {
 // PrintJobSummary prints a detailed job summary
 func (f *OutputFormatter) PrintJobSummary(summary *JobSummary) {
 	fmt.Println()
-	fmt.Println(f.Line('='))
-	fmt.Println(" JOB SUMMARY")
-	fmt.Println(f.Line('-'))
+	fmt.Println(f.Color(f.Line('='), ColorDimGray))
+	fmt.Printf("%s %s\n",
+		f.GetIndent(IndentJob),
+		f.Color("JOB SUMMARY", ColorBold))
+	fmt.Println(f.Color(f.Line('-'), ColorDimGray))
 
-	f.PrintKeyValue("Job Name", summary.JobName, 2)
-	f.PrintKeyValue("Total Steps", fmt.Sprintf("%d", summary.TotalSteps), 2)
-	f.PrintKeyValue("Completed", fmt.Sprintf("%d", summary.CompletedSteps), 2)
+	f.PrintKeyValueWithLevel("Job Name", summary.JobName, IndentStep)
+	f.PrintKeyValueWithLevel("Total Steps", fmt.Sprintf("%d", summary.TotalSteps), IndentStep)
+	f.PrintKeyValueWithLevel("Completed", fmt.Sprintf("%d", summary.CompletedSteps), IndentStep)
 
 	if summary.FailedSteps > 0 {
-		f.PrintKeyValue("Failed", fmt.Sprintf("%d", summary.FailedSteps), 2)
+		f.PrintKeyValueWithLevel("Failed",
+			f.Color(fmt.Sprintf("%d", summary.FailedSteps), ColorRed),
+			IndentStep)
 	}
 
 	if summary.SkippedSteps > 0 {
-		f.PrintKeyValue("Skipped", fmt.Sprintf("%d", summary.SkippedSteps), 2)
+		f.PrintKeyValueWithLevel("Skipped",
+			f.Color(fmt.Sprintf("%d", summary.SkippedSteps), ColorYellow),
+			IndentStep)
 	}
 
-	f.PrintKeyValue("Duration", f.FormatDuration(summary.Duration), 2)
+	f.PrintKeyValueWithLevel("Duration", f.FormatDuration(summary.Duration), IndentStep)
 
-	status := "SUCCESS"
+	status := f.Color("SUCCESS", ColorGreen)
 	if !summary.Success {
-		status = "FAILED"
+		status = f.Color("FAILED", ColorRed)
 	}
-	f.PrintKeyValue("Status", status, 2)
+	f.PrintKeyValueWithLevel("Status", status, IndentStep)
 
 	if len(summary.Errors) > 0 {
 		fmt.Println()
-		fmt.Println(" Errors:")
+		fmt.Printf("%s %s:\n",
+			f.GetIndent(IndentStep),
+			f.Color("Errors", ColorRed))
 		for _, err := range summary.Errors {
-			f.PrintList(err, 2)
+			f.PrintListWithLevel(err, IndentDetail)
 		}
 	}
 
-	fmt.Println(f.Line('='))
+	fmt.Println(f.Color(f.Line('='), ColorDimGray))
 }
 
 // StepResult represents the result of a step execution
@@ -323,24 +473,27 @@ type StepResult struct {
 
 // PrintStepResult prints a formatted step result
 func (f *OutputFormatter) PrintStepResult(result *StepResult, current, total int) {
-	status := "OK"
+	status := f.Color("OK", ColorGreen)
 	if result.Skipped {
-		status = "SKIPPED"
+		status = f.Color("SKIPPED", ColorYellow)
 	} else if !result.Success {
-		status = "FAILED"
+		status = f.Color("FAILED", ColorRed)
 	}
 
-	fmt.Printf("[%d/%d] %-50s [%s] %s\n",
-		current, total,
+	progress := fmt.Sprintf("[%d/%d]", current, total)
+
+	fmt.Printf("%s%s %-50s [%s] %s\n",
+		f.GetIndent(IndentStep),
+		f.Color(progress, ColorDarkGray),
 		f.TruncateText(result.Name, 50),
 		status,
-		f.FormatDuration(result.Duration))
+		f.Color(f.FormatDuration(result.Duration), ColorDimGray))
 
 	if f.Verbose && result.Output != "" {
 		lines := strings.Split(strings.TrimSpace(result.Output), "\n")
 		for _, line := range lines {
 			if line != "" {
-				f.PrintOutput(line, 4)
+				f.PrintOutputWithLevel(line, IndentOutput)
 			}
 		}
 	}
@@ -365,7 +518,7 @@ func (f *OutputFormatter) PrintEnvironment(env map[string]string) {
 	}
 
 	for _, key := range keys {
-		f.PrintKeyValue(key, env[key], 2)
+		f.PrintKeyValueWithLevel(key, env[key], IndentStep)
 	}
 }
 
@@ -378,6 +531,16 @@ func (f *OutputFormatter) PrintServices(services map[string]string) {
 	f.PrintSection("Services")
 
 	for name, image := range services {
-		f.PrintKeyValue(name, image, 2)
+		f.PrintKeyValueWithLevel(name, image, IndentStep)
 	}
+}
+
+// SetColorEnabled enables or disables color output
+func (f *OutputFormatter) SetColorEnabled(enabled bool) {
+	f.UseColor = enabled
+}
+
+// IsColorEnabled returns whether colors are enabled
+func (f *OutputFormatter) IsColorEnabled() bool {
+	return f.UseColor
 }
