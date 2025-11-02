@@ -1,0 +1,46 @@
+# Build artifacts
+build/
+*.exe
+git-ci
+git-ci-*
+
+# Test artifacts
+*.test
+*.out
+coverage.html
+coverage.out
+
+# Go build cache
+vendor/
+.cache/
+
+# IDE and editor files
+.idea/
+*.swp
+*.swo
+*~
+.vscode/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Git
+.git/
+.gitignore
+
+# Archives and downloads
+*.tar.gz
+*.zip
+go*.tar.gz.*

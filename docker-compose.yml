@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+
+  dev:
+    build:
+      context: .
+      target: development
+    image: git-ci:dev
+    container_name: git-ci-dev
+    volumes:
+      - .:/workspace
+      - go-modules:/go/pkg/mod
+      - go-cache:/root/.cache/go-build
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /workspace
+    command: bash
+    stdin_open: true
+    tty: true
+    environment:
+      - CGO_ENABLED=0
+      - GOOS=linux
+      - GOARCH=amd64
+    networks:
+      - git-ci-network
+
+  builder:
+    build:
+      context: .
+      target: builder
+    image: git-ci:builder
+    container_name: git-ci-builder
+    volumes:
+      - ./build:/build
+      - .:/workspace:ro
+    working_dir: /workspace
+    networks:
+      - git-ci-network
+
+  runtime:
+    build:
+      context: .
+      target: runtime
+    image: git-ci:latest
+    container_name: git-ci-runtime
+    volumes:
+      - .:/workspace:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /workspace
+    networks:
+      - git-ci-network
+    depends_on:
+      - builder
+
+volumes:
+  go-modules:
+    driver: local
+  go-cache:
+    driver: local
+
+networks:
+  git-ci-network:
+    driver: bridge
