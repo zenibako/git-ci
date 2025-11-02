@@ -24,15 +24,9 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache: true
 
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: latest
-          args: |
-            --timeout=5m --disable-all \
-            --enable=gofmt --enable=govet \
-            --enable=errcheck --enable=ineffassign \
-            --enable=staticcheck
+      - name: Run Lint
+        run: |
+          make lint
 
   test:
     name: Test
@@ -64,8 +58,8 @@ jobs:
     needs: [lint, test]
     strategy:
       matrix:
-        os: [linux, darwin, windows]
-        arch: [amd64, arm64]
+        os: [linux] # , darwin, windows (will re-activate after an MVP
+        arch: [amd64] # , arm64
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
