@@ -57,7 +57,7 @@ jobs:
             -X main.Commit=${COMMIT} \
             -X main.BuildTime=${BUILD_TIME} \
             -X main.Branch=${BRANCH}" \
-          -o ${OUTPUT_NAME} .
+          -o ${OUTPUT_NAME} ./cmd
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
